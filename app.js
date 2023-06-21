@@ -4,6 +4,10 @@ const path = require("path");
 
 const errorController = require("./controllers/error");
 const app = express();
+
+app.set("view engine", "ejs");
+app.set("views", "views");
+
 // routes
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
