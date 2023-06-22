@@ -1,3 +1,10 @@
+# tmp folder
+Practice/*
+
+# Prettier config
+.prettierrc
+.prettierignore
+
 # Vscode settings
 .vscode
 
