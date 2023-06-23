@@ -1,9 +1,9 @@
 const express = require("express");
 
+const ShopController = require("../controllers/shop");
+
 const router = express.Router();
 
-router.get("/product", (req, res, next) => {
-  res.sendFile("../views/shop.html");
-});
+router.get("/", ShopController.getIndexPage);
 
 module.exports = router;
