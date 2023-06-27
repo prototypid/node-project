@@ -15,7 +15,6 @@ exports.addProduct;
 exports.getIndexPage = (req, res, next) => {
   Product.fetchAll()
     .then(([rows, fieldData]) => {
-      console.log(rows, fieldData);
       res.render("shop/index", {
         prods: rows,
         pageTitle: "Shop",
