@@ -1,8 +1,7 @@
-const db = require("../utils/database");
+const getDb = require("../utils/database").getDb;
 
 module.exports = class Product {
-  constructor(id, title, imageUrl, description, price) {
-    this.id = id;
+  constructor(title, imageUrl, description, price) {
     this.title = title;
     this.imageUrl = imageUrl;
     this.description = description;
@@ -10,17 +9,27 @@ module.exports = class Product {
   }
 
   save() {
-    // return promise
-    return db.execute(
-      "INSERT INTO products (title, price, imageUrl, description) VALUES (?, ?, ?, ?)",
-      [this.title, this.price, this.imageUrl, this.description]
-    );
+    const db = getDb();
+    return db
+      .collection("products")
+      .insertOne(this)
+      .then((result) => console.log(result))
+      .catch((err) => console.log(err));
   }
 
   static deleteById(id) {}
 
   static fetchAll() {
-    return db.execute("SELECT * FROM products");
+    const db = getDb();
+    return db
+      .collection("products")
+      .find()
+      .toArray()
+      .then((products) => {
+        console.log(products);
+        return products;
+      })
+      .catch((err) => console.log(err));
   }
 
   static findById(id) {
