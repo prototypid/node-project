@@ -1,9 +1,9 @@
 const Product = require("../models/product");
 
 exports.getProductsPage = (req, res, next) => {
-  Product.fetchAll().then(([data, _]) => {
+  Product.fetchAll().then((products) => {
     res.render("shop/product-list", {
-      prods: data,
+      prods: products,
       pageTitle: "All Products",
       path: "/products",
     });
@@ -12,9 +12,10 @@ exports.getProductsPage = (req, res, next) => {
 
 exports.getIndexPage = (req, res, next) => {
   Product.fetchAll()
-    .then(([rows, fieldData]) => {
+    .then((products) => {
+      console.log(products);
       res.render("shop/index", {
-        prods: rows,
+        prods: products,
         pageTitle: "Shop",
         path: "/",
       });
@@ -25,10 +26,10 @@ exports.getIndexPage = (req, res, next) => {
 exports.getProduct = (req, res, next) => {
   const productId = req.params.productId;
   Product.findById(productId)
-    .then(([product]) => {
+    .then((product) => {
       res.render("shop/product-detail", {
-        product: product[0],
-        pageTitle: product[0].title,
+        product: product,
+        pageTitle: product.title,
         path: "/products",
       });
     })
