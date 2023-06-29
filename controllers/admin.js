@@ -56,3 +56,27 @@ exports.renderEditProducts = (req, res, next) => {
     .catch((err) => console.log(err));
 };
 
+exports.postUpdateProduct = (req, res, next) => {
+  const productId = req.body.productId;
+  const updatedTitle = req.body.title;
+  const updatedImageUrl = req.body.imageUrl;
+  const updatedPrice = req.body.price;
+  const updatedDescription = req.body.description;
+
+  console.log(1);
+  updatedProduct = new Product(
+    updatedTitle,
+    updatedImageUrl,
+    updatedDescription,
+    updatedPrice,
+    productId
+  );
+
+  updatedProduct
+    .save()
+    .then((result) => {
+      console.log("Updated Product");
+      res.redirect("/admin/products");
+    })
+    .catch((err) => console.log(err));
+};

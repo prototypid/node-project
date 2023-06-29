@@ -12,10 +12,20 @@ module.exports = class Product {
 
   save() {
     const db = getDb();
-    return db
-      .collection("products")
-      .insertOne(this)
-      .then((result) => console.log(result))
+    let dbAction;
+    if (this._id) {
+      dbAction = db
+        .collection("products")
+        .updateOne({ _id: this._id }, { $set: this });
+    } else {
+      dbAction = db.collection("products").insertOne(this);
+    }
+
+    return dbAction
+      .then((result) => {
+        console.log(result);
+        return result;
+      })
       .catch((err) => console.log(err));
   }
 
