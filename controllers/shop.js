@@ -69,3 +69,12 @@ exports.postDeleteCartProduct = (req, res, next) => {
     .then(() => res.redirect("/cart"))
     .catch((err) => console.log(err));
 };
+
+exports.postOrder = (req, res, next) => {
+  req.user
+    .addOrder()
+    .then(() => {
+      res.redirect("/orders");
+    })
+    .catch((err) => console.log(err));
+};
