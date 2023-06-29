@@ -13,7 +13,6 @@ exports.getProductsPage = (req, res, next) => {
 exports.getIndexPage = (req, res, next) => {
   Product.fetchAll()
     .then((products) => {
-      console.log(products);
       res.render("shop/index", {
         prods: products,
         pageTitle: "Shop",
