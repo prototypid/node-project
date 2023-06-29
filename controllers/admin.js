@@ -34,3 +34,25 @@ exports.renderAdminProducts = (req, res, next) => {
     })
     .catch((err) => console.log(err));
 };
+
+exports.renderEditProducts = (req, res, next) => {
+  const editMode = req.query.edit;
+
+  if (!editMode) res.redirect("/");
+
+  const productId = req.params.productId;
+
+  Product.findById(productId)
+    .then((product) => {
+      if (!product) res.redirect("/");
+
+      res.render("admin/edit-product", {
+        product: product,
+        path: "admin/edit-product",
+        pageTitle: "Edit Product",
+        editing: editMode,
+      });
+    })
+    .catch((err) => console.log(err));
+};
+
