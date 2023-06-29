@@ -60,3 +60,12 @@ exports.postCart = (req, res, next) => {
     })
     .catch((err) => console.log(err));
 };
+
+exports.postDeleteCartProduct = (req, res, next) => {
+  const productId = req.body.productId;
+
+  req.user
+    .deleteProductFromCart(productId)
+    .then(() => res.redirect("/cart"))
+    .catch((err) => console.log(err));
+};
