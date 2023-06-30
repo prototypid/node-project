@@ -1,127 +1,28 @@
-const mongodb = require("mongodb");
-const getDb = require("../utils/database").getDb;
+const mongoose = require("mongoose");
 
-class User {
-  constructor(username, email, cart, id) {
-    this.username = username;
-    this.email = email;
-    this.cart = cart;
-    this._id = id;
-  }
+const Schema = mongoose.Schema;
 
-  save() {
-    const db = getDb();
-    return db.collection("users").inserOne(this);
-  }
+const userSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+  cart: {
+    items: [
+      {
+        productId: {
+          type: Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+        quantity: { type: Number, required: true },
+      },
+    ],
+  },
+});
 
-  addToCart(product) {
-    // check if product is already in the cart
-    const cartProductIndex = this.cart.items.findIndex((prod) => {
-      return product._id.toString() === prod.productId.toString();
-    });
-    let newQuantity = 1;
-    const updatedCartItems = [...this.cart.items];
-
-    if (cartProductIndex >= 0) {
-      // update product quantity
-      updatedCartItems[cartProductIndex].quantity += 1;
-    } else {
-      updatedCartItems.push({
-        // add product to cart
-        productId: new mongodb.ObjectId(product._id),
-        quantity: newQuantity,
-      });
-    }
-
-    const updatedCart = {
-      items: updatedCartItems,
-    };
-
-    // update User in DB
-    const db = getDb();
-    return db
-      .collection("users")
-      .updateOne(
-        { _id: new mongodb.ObjectId(this._id) },
-        { $set: { cart: updatedCart } }
-      );
-  }
-
-  getCart() {
-    const db = getDb();
-    // const productIds = this.cart.items.forEach(item => item.productId)
-    const productIds = this.cart.items.map((item) => item.productId);
-
-    // get all products from db
-    return db
-      .collection("products")
-      .find({ _id: { $in: productIds } })
-      .toArray()
-      .then((products) => {
-        return products.map((product) => {
-          return {
-            ...product,
-            quantity: this.cart.items.find(
-              (item) => item.productId.toString() === product._id.toString()
-            ).quantity,
-          };
-        });
-      })
-      .catch((err) => console.log(err));
-  }
-
-  deleteProductFromCart(productId) {
-    const updatedCartItems = this.cart.items.filter(
-      (item) => item.productId.toString() !== productId
-    );
-    const db = getDb();
-    return db
-      .collection("users")
-      .updateOne(
-        { _id: new mongodb.ObjectId(this._id) },
-        { $set: { cart: { items: updatedCartItems } } }
-      );
-  }
-
-  addOrder() {
-    const db = getDb();
-    return this.getCart()
-      .then((products) => {
-        const order = {
-          items: products,
-          user: {
-            _id: new mongodb.ObjectId(this._id),
-            name: this.username,
-            email: this.email,
-          },
-        };
-        return db.collection("orders").insertOne(order);
-      })
-      .then(() => {
-        this.cart = { items: [] };
-        return db
-          .collection("users")
-          .updateOne(
-            { _id: new mongodb.ObjectId(this._id) },
-            { $set: { cart: { items: [] } } }
-          );
-      });
-  }
-
-  getOrders() {
-    const db = getDb();
-    return db
-      .collection("orders")
-      .find({ "user._id": new mongodb.ObjectId(this._id) })
-      .toArray();
-  }
-
-  static findById(userId) {
-    const db = getDb();
-    return db
-      .collection("users")
-      .findOne({ _id: new mongodb.ObjectId(userId) });
-  }
-}
-
-module.exports = User;
+module.exports = mongoose.model("User", userSchema);
