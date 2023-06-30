@@ -1,3 +1,4 @@
+const Order = require("../models/order");
 const Product = require("../models/product");
 
 exports.getProductsPage = (req, res, next) => {
@@ -84,7 +85,25 @@ exports.renderOrder = (req, res, next) => {
 
 exports.postOrder = (req, res, next) => {
   req.user
-    .addOrder()
+    .populate("cart.items.productId")
+    .then((user) => {
+      const products = user.cart.items.map((item) => {
+        return { quantity: item.quantity, product: { ...item.productId._doc } }; // _doc returns only the object data excluding metadata
+      });
+
+      const order = new Order({
+        user: {
+          name: req.user.name,
+          email: req.user.email,
+          userId: req.user,
+        },
+        products: products,
+      });
+      return order.save();
+    })
+    .then(() => {
+      return req.user.clearCart();
+    })
     .then(() => {
       res.redirect("/orders");
     })
