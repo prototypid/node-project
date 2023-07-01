@@ -24,16 +24,6 @@ const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
 
-// add user to every request
-app.use((req, res, next) => {
-  User.findById("649ecd12dbb94c1cfac2156d")
-    .then((user) => {
-      req.user = user;
-      next();
-    })
-    .catch((err) => console.log(err));
-});
-
 // body-parser
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static("public"));
@@ -45,6 +35,19 @@ app.use(
     store: store,
   })
 );
+
+// add user to every request
+app.use((req, res, next) => {
+  if (!req.session.user) return next();
+
+  User.findById(req.session.user._id)
+    .then((user) => {
+      // this will fetch the user from database using session user details
+      req.user = user;
+      next();
+    })
+    .catch((err) => console.log(err));
+});
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
