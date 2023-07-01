@@ -2,11 +2,19 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const env = require("./utils/config");
+const session = require("express-session");
+const MongoDbStore = require("connect-mongodb-session")(session);
 
 const errorController = require("./controllers/error");
 const User = require("./models/user");
 
+const MONGODB_URI = `mongodb://${env.database_username}:${env.database_password}@${env.database_host}:${env.database_port}/shop?authSource=admin&w=1`;
+
 const app = express();
+const store = new MongoDbStore({
+  uri: MONGODB_URI,
+  collection: "sessions",
+});
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -29,6 +37,14 @@ app.use((req, res, next) => {
 // body-parser
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static("public"));
+app.use(
+  session({
+    secret: "hardestSecret",
+    resave: false,
+    saveUninitialized: false,
+    store: store,
+  })
+);
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
@@ -37,9 +53,7 @@ app.use(authRoutes);
 app.use(errorController.get404);
 
 mongoose
-  .connect(
-    `mongodb://${env.database_username}:${env.database_password}@${env.database_host}:${env.database_port}/shop?authSource=admin&w=1`
-  )
+  .connect(MONGODB_URI)
   .then(() => {
     User.findOne().then((user) => {
       if (!user) {
