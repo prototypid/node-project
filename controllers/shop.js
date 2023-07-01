@@ -7,6 +7,7 @@ exports.getProductsPage = (req, res, next) => {
       prods: products,
       pageTitle: "All Products",
       path: "/products",
+      isAuthenticated: req.session.isLoggedIn,
     });
   });
 };
@@ -18,6 +19,7 @@ exports.getIndexPage = (req, res, next) => {
         prods: products,
         pageTitle: "Shop",
         path: "/",
+        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -31,6 +33,7 @@ exports.getProduct = (req, res, next) => {
         product: product,
         pageTitle: product.title,
         path: "/products",
+        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -38,14 +41,14 @@ exports.getProduct = (req, res, next) => {
 
 exports.renderCart = (req, res, next) => {
   req.user
-    .populate("cart.items.productId") // populate doesn't returns a promise
+    .populate("cart.items.productId")
     .then((user) => {
       const products = user.cart.items;
-      console.log(products);
       res.render("shop/cart", {
         path: "/cart",
         pageTitle: "Your Cart",
         products: products,
+        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -58,7 +61,6 @@ exports.postCart = (req, res, next) => {
       return req.user.addToCart(product);
     })
     .then((result) => {
-      console.log(result);
       res.redirect("/cart");
     })
     .catch((err) => console.log(err));
@@ -68,7 +70,7 @@ exports.postDeleteCartProduct = (req, res, next) => {
   const productId = req.body.productId;
 
   req.user
-    .deleteProductFromCart(productId)
+    .removeProductFromCart(productId)
     .then(() => res.redirect("/cart"))
     .catch((err) => console.log(err));
 };
@@ -79,6 +81,7 @@ exports.renderOrder = (req, res, next) => {
       path: "/orders",
       pageTitle: "Your Orders",
       orders: orders,
+      isAuthenticated: req.session.isLoggedIn,
     });
   });
 };
