@@ -15,15 +15,29 @@ exports.postLogin = (req, res, next) => {
   const password = req.body.password;
   // res.setHeader("Set-Cookie", "loggedIn=true");
 
-  User.findById("649ecd12dbb94c1cfac2156d")
+  User.findOne({ email: email })
     .then((user) => {
-      req.session.isLoggedIn = true;
-      req.session.user = user;
-      req.session.save((err) => {
-        // this will make sure page is redirected only after creating a session
-        console.log(err);
-        res.redirect("/");
-      });
+      if (!user) {
+        return res.redirect("/login");
+      }
+
+      bcrypt
+        .compare(password, user.password)
+        .then((passwordMatched) => {
+          if (passwordMatched) {
+            req.session.isLoggedIn = true;
+            req.session.user = user;
+            return req.session.save((err) => {
+              // req.session.save() will make sure page is redirected only after creating a session
+              // this is not required
+              console.log(err);
+              return res.redirect("/");
+            });
+          }
+
+          res.redirect("/login");
+        })
+        .catch((err) => console.log(err));
     })
     .catch((err) => console.log(err));
 };
