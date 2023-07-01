@@ -58,20 +58,6 @@ app.use(errorController.get404);
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
-    User.findOne().then((user) => {
-      if (!user) {
-        const user = new User({
-          name: "darq",
-          email: "darq@example.com",
-          cart: {
-            items: [],
-          },
-        });
-
-        user.save();
-      }
-    });
-
     console.log("Listening");
     app.listen(env.port);
   })

@@ -32,3 +32,37 @@ exports.postLogout = (req, res, next) => {
     res.redirect("/");
   });
 };
+
+exports.renderSignup = (req, res, next) => {
+  res.render("auth/signup", {
+    path: "/signup",
+    pageTitle: "Signup",
+    isAuthenticated: false,
+  });
+};
+
+exports.postSignup = (req, res, next) => {
+  const name = req.body.name;
+  const email = req.body.email;
+  const password = req.body.password;
+  const confimPassword = req.body.confimPassword;
+
+  // check if user exists
+  User.findOne({ email: email })
+    .then((usr) => {
+      if (usr) {
+        return res.redirect("/signup");
+      }
+
+      const user = new User({
+        name: name,
+        email: email,
+        password: password,
+        cart: { items: [] },
+      });
+
+      return user.save();
+    })
+    .then((newUser) => res.redirect("/login"))
+    .catch((err) => console.log(err));
+};
