@@ -7,6 +7,7 @@ exports.renderLogin = (req, res, next) => {
     path: "/login",
     pageTitle: "Login",
     isAuthenticated: false,
+    csrfToken: req.csrfToken(),
   });
 };
 

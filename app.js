@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const env = require("./utils/config");
 const session = require("express-session");
 const MongoDbStore = require("connect-mongodb-session")(session);
+const csrf = require("csurf");
 
 const errorController = require("./controllers/error");
 const User = require("./models/user");
@@ -15,6 +16,7 @@ const store = new MongoDbStore({
   uri: MONGODB_URI,
   collection: "sessions",
 });
+const csrfProtection = csrf();
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -35,6 +37,7 @@ app.use(
     store: store,
   })
 );
+app.use(csrfProtection);
 
 // add user to every request
 app.use((req, res, next) => {
